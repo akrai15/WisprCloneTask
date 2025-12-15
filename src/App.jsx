@@ -13,7 +13,7 @@ import { CopyIcon, CheckIcon, TrashIcon } from './components/Icons';
 import './App.css';
 
 function App() {
-  // 1. Init Custom Hook
+  
   const { 
     isRecording, 
     connectionState, 
@@ -23,10 +23,10 @@ function App() {
     clearTranscription 
   } = useDeepgram();
 
-  // 2. Local UI State
+  
   const [copyStatus, setCopyStatus] = useState('Copy');
 
-  // 3. Handlers
+  
   const handleCopyToClipboard = async () => {
     if (!transcription) return;
     try {
@@ -49,7 +49,7 @@ function App() {
       </header>
 
       <main>
-        {/* Transcription Area */}
+        
         <div className="transcription-box">
           {transcription || (
             <span className="placeholder">
@@ -58,14 +58,14 @@ function App() {
           )}
         </div>
 
-        {/* Record Button Component */}
+        
         <Controls 
           isRecording={isRecording}
           onStart={startRecording}
           onStop={stopRecording}
         />
 
-        {/* Action Buttons (Copy / Clear) */}
+        
         <div className="actions">
           <button 
             className="action-btn primary" 

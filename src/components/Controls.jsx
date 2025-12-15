@@ -2,8 +2,7 @@ import React from 'react';
 import { MicIcon } from './Icons';
 
 const Controls = ({ isRecording, onStart, onStop }) => {
-  // Logic to prevent rapid-fire clicks if needed, 
-  // currently just wrappers for the props.
+  
   const handlePushDown = () => {
     if (!isRecording) onStart();
   };
@@ -19,8 +18,8 @@ const Controls = ({ isRecording, onStart, onStop }) => {
           className={`record-btn ${isRecording ? 'active' : ''}`}
           onMouseDown={handlePushDown}
           onMouseUp={handlePushUp}
-          onMouseLeave={handlePushUp} // Stop recording if mouse slips off
-          onTouchStart={handlePushDown} // Basic mobile support
+          onMouseLeave={handlePushUp} 
+          onTouchStart={handlePushDown} 
           onTouchEnd={handlePushUp}
           title="Hold to Speak"
         >

@@ -1,7 +1,7 @@
 import React from 'react';
 
 const StatusBadge = ({ connectionState }) => {
-  // Helper to determine the text label
+  
   const getLabel = () => {
     switch (connectionState) {
       case 'Connected': return 'Ready';
@@ -11,7 +11,7 @@ const StatusBadge = ({ connectionState }) => {
     }
   };
 
-  // Helper to determine the CSS class (e.g., 'connected', 'error')
+ 
   const getStatusClass = () => {
     if (connectionState.startsWith('Error')) return 'error';
     return connectionState.toLowerCase();

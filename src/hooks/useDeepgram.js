@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 
-const DEEPGRAM_API_KEY = import.meta.env.VITE_DEEPGRAM_API_KEY;; // In prod, fetch this from a backend!
+const DEEPGRAM_API_KEY = import.meta.env.VITE_DEEPGRAM_API_KEY;; 
 
 export const useDeepgram = () => {
   const [transcription, setTranscription] = useState('');
   const [isRecording, setIsRecording] = useState(false);
-  const [connectionState, setConnectionState] = useState('Disconnected'); // 'Connecting', 'Connected', 'Error'
+  const [connectionState, setConnectionState] = useState('Disconnected'); 
   
   const socketRef = useRef(null);
   const mediaRecorderRef = useRef(null);
