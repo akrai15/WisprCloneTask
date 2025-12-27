@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { invoke } from '@tauri-apps/api/core';
+import { sendNotification, isPermissionGranted, requestPermission } from '@tauri-apps/plugin-notification';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 // Hooks
 import { useDeepgram } from './hooks/useDeepgram';
@@ -24,83 +26,119 @@ function App() {
   } = useDeepgram();
 
   const [copyStatus, setCopyStatus] = useState('Copy');
-  
-  // Refs for stable state access inside the shortcut listener
   const isRecordingRef = useRef(false);
   const isKeyDownRef = useRef(false);
   const transcriptionRef = useRef("");
+  const appWindow = getCurrentWindow();
 
-  // Keep Refs in sync with React State so the shortcut always sees the latest data
+  // --- 1. FULL VOLUME SOUND GENERATOR ---
+  const playFeedbackSound = (type) => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      // Square wave is much louder/sharper than the default 'sine'
+      oscillator.type = 'square'; 
+
+      if (type === 'start') {
+        oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); 
+        oscillator.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+      } else {
+        oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.15);
+      }
+
+      // 100% VOLUME
+      gainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+      
+      // Fast decay to avoid annoying echoes
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.15);
+    } catch (e) {
+      console.error("Audio feedback failed", e);
+    }
+  };
+
+  // --- 2. CONNECTION OBSERVER ---
+  useEffect(() => {
+    if (connectionState === 'Connected') {
+      playFeedbackSound('start');
+    } else if (connectionState === 'Disconnected') {
+      if (transcriptionRef.current !== "") {
+        playFeedbackSound('stop');
+      }
+    }
+  }, [connectionState]);
+
   useEffect(() => { isRecordingRef.current = isRecording; }, [isRecording]);
   useEffect(() => { transcriptionRef.current = transcription; }, [transcription]);
 
   useEffect(() => {
+    const initApp = async () => {
+      let permission = await isPermissionGranted();
+      if (!permission) await requestPermission();
+      await appWindow.setAlwaysOnTop(true);
+    };
+    initApp();
+  }, []);
+
+  // --- 3. SHORTCUT LOGIC ---
+  useEffect(() => {
     const setupShortcut = async () => {
       try {
-        // Clean up to prevent "Hotkey already registered" errors
         await unregisterAll();
-
         await register('Control+Alt+P', async (event) => {
           if (event.state === 'Pressed') {
-            // 1. Block the OS auto-repeat from spamming the toggle
             if (isKeyDownRef.current) return;
             isKeyDownRef.current = true;
 
-            // 2. TOGGLE LOGIC
             if (!isRecordingRef.current) {
-              console.log("Starting System-wide Voice Input...");
               clearTranscription();
               transcriptionRef.current = "";
               startRecording();
             } else {
-              console.log("Stopping and Pasting...");
               stopRecording();
               
-              // 3. CRITICAL: 200ms buffer to allow the final voice packet to arrive
               setTimeout(async () => {
                 const finalSpeech = transcriptionRef.current.trim();
                 if (finalSpeech) {
                   try {
-                    await writeText(finalSpeech); // Write to Clipboard
-                    await invoke('trigger_paste'); // Trigger Ctrl+V
+                    await writeText(finalSpeech); 
+                    await invoke('trigger_paste'); 
+                    sendNotification({ 
+                      title: 'Wispr Clone', 
+                      body: '✅ Transcribed & Pasted!' 
+                    });
                   } catch (err) {
-                    console.error("Paste failed. Check permissions:", err);
+                    console.error("Paste failed:", err);
                   }
                 }
               }, 250);
             }
-          } 
-          else if (event.state === 'Released') {
+          } else {
             isKeyDownRef.current = false;
           }
         });
       } catch (err) {
-        console.error("Shortcut Error:", err);
+        console.error("Shortcut failed:", err);
       }
     };
-
     setupShortcut();
     return () => { unregisterAll(); };
   }, [startRecording, stopRecording, clearTranscription]);
 
-  const handleCopyToClipboard = async () => {
-    if (!transcription) return;
-    try {
-      await writeText(transcription);
-      setCopyStatus('Copied!');
-      setTimeout(() => setCopyStatus('Copy'), 2000);
-    } catch (err) {
-      setCopyStatus('Error');
-    }
-  };
-
   return (
-    <div className="container">
+    <div className={`container ${isRecording ? 'recording-active' : ''}`}>
       <header>
         <h1><span>🎙️</span> Wispr Clone</h1>
         <StatusBadge connectionState={connectionState} />
       </header>
-
       <main>
         <div className="transcription-box">
           {transcription || (
@@ -109,18 +147,11 @@ function App() {
             </span>
           )}
         </div>
-
-        <Controls 
-          isRecording={isRecording}
-          onStart={startRecording}
-          onStop={stopRecording}
-        />
-
+        <Controls isRecording={isRecording} onStart={startRecording} onStop={stopRecording} />
         <div className="actions">
-          <button className="action-btn primary" onClick={handleCopyToClipboard} disabled={!transcription}>
-            {copyStatus === 'Copied!' ? <CheckIcon /> : <CopyIcon />} {copyStatus}
+          <button className="action-btn primary" onClick={() => writeText(transcription)} disabled={!transcription}>
+            <CopyIcon /> Copy
           </button>
-          
           <button className="action-btn secondary" onClick={clearTranscription} disabled={!transcription}>
             <TrashIcon /> Clear
           </button>
