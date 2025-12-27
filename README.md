@@ -1,6 +1,7 @@
 # **WisprClone: Technical Development Case Study**
 ## *A High-Performance Voice-to-Text Desktop Application built with Tauri v2*
-##*Video Link-->https://drive.google.com/file/d/1S_OBqe9rFQtCmHIU2IOJUY9KdP5FNqmF/view?usp=sharing
+## *Recording 1-->https://drive.google.com/file/d/1S_OBqe9rFQtCmHIU2IOJUY9KdP5FNqmF/view?usp=sharing
+## *New Recording 2 with new feature--->https://drive.google.com/file/d/14VwpG7wZiI5YAbh6CfizM1t0DdH-u3vO/view?usp=sharing
 
 ### 1. **Executive Summary**
 This document details the engineering journey of developing "WisprClone," a native desktop application designed to replicate the functionality of the Wispr voice interface. The project leverages **Tauri v2** for its lightweight, secure system architecture, **React** for a responsive frontend, and the **Deepgram API** for low-latency speech-to-text transcription.  
