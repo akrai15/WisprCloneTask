@@ -6,7 +6,9 @@
   "permissions": [
     "core:default",
     "opener:default",
-    "clipboard-manager:default",
-    "clipboard-manager:allow-write-text"
+    "clipboard-manager:allow-write-text",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-is-registered",
+    "global-shortcut:allow-unregister-all"
   ]
 }
