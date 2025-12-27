@@ -17,11 +17,27 @@
       {
         "label": "main",
         "title": "WisprClone",
-        "width": 800,
+        "width": 400,
         "height": 600,
         "resizable": true,
         "fullscreen": false,
+        "transparent": true,
+        "alwaysOnTop": true,
         "visible": true
+      },
+      {
+        "label": "hud",
+        "url": "hud.html",
+        "width": 160,
+        "height": 60,
+        "x": 20,
+        "y": 20,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "visible": false,
+        "skipTaskbar": true,
+        "resizable": false
       }
     ]
   },
@@ -35,6 +51,5 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
-  },
-  "plugins": {}
+  }
 }

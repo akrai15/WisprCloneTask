@@ -4,6 +4,7 @@ import { register, unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { invoke } from '@tauri-apps/api/core';
 import { sendNotification, isPermissionGranted, requestPermission } from '@tauri-apps/plugin-notification';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'; // Corrected Import
 
 // Hooks
 import { useDeepgram } from './hooks/useDeepgram';
@@ -31,7 +32,24 @@ function App() {
   const transcriptionRef = useRef("");
   const appWindow = getCurrentWindow();
 
-  // --- 1. FULL VOLUME SOUND GENERATOR ---
+  // --- 1. HUD CONTROL LOGIC ---
+  useEffect(() => {
+    const handleHUD = async () => {
+      // Get the HUD window instance safely inside the effect
+      const hud = await WebviewWindow.getByLabel('hud');
+      if (hud) {
+        if (isRecording) {
+          await hud.show();
+          await hud.setAlwaysOnTop(true);
+        } else {
+          await hud.hide();
+        }
+      }
+    };
+    handleHUD();
+  }, [isRecording]);
+
+  // --- 2. FULL VOLUME SOUND GENERATOR ---
   const playFeedbackSound = (type) => {
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -40,8 +58,6 @@ function App() {
 
       oscillator.connect(gainNode);
       gainNode.connect(audioCtx.destination);
-
-      // Square wave is much louder/sharper than the default 'sine'
       oscillator.type = 'square'; 
 
       if (type === 'start') {
@@ -52,10 +68,7 @@ function App() {
         oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.15);
       }
 
-      // 100% VOLUME
       gainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
-      
-      // Fast decay to avoid annoying echoes
       gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
 
       oscillator.start();
@@ -65,7 +78,7 @@ function App() {
     }
   };
 
-  // --- 2. CONNECTION OBSERVER ---
+  // --- 3. CONNECTION OBSERVER ---
   useEffect(() => {
     if (connectionState === 'Connected') {
       playFeedbackSound('start');
@@ -88,7 +101,7 @@ function App() {
     initApp();
   }, []);
 
-  // --- 3. SHORTCUT LOGIC ---
+  // --- 4. SHORTCUT LOGIC ---
   useEffect(() => {
     const setupShortcut = async () => {
       try {
