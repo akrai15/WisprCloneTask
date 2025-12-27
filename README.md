@@ -1,7 +1,32 @@
 # **WisprClone: Technical Development Case Study**
 ## *A High-Performance Voice-to-Text Desktop Application built with Tauri v2*
-## *Recording 1-->https://drive.google.com/file/d/1S_OBqe9rFQtCmHIU2IOJUY9KdP5FNqmF/view?usp=sharing
-## *New Recording 2 with new feature--->https://drive.google.com/file/d/14VwpG7wZiI5YAbh6CfizM1t0DdH-u3vO/view?usp=sharing
+## *Recording 1*-->https://drive.google.com/file/d/1S_OBqe9rFQtCmHIU2IOJUY9KdP5FNqmF/view?usp=sharing
+## *New Recording 2 with new feature*--->https://drive.google.com/file/d/14VwpG7wZiI5YAbh6CfizM1t0DdH-u3vO/view?usp=sharing
+
+
+##  Quick Start Guide
+
+### 1. Prerequisites
+
+* **Rust:** Install via [rustup.rs](https://rustup.rs/).
+* **Node.js:** Ensure you have the latest LTS version.
+* **Tauri Deps:** [System-specific dependencies](https://tauri.app/v1/guides/getting-started/prerequisites) (C++, WebKit, etc.).
+
+### 2. Environment Setup
+
+1. Create a `.env` file in the root folder.
+2. Add your **Deepgram API Key** i.e DEEPGRAM_API_KEY=your_actual_key_here
+
+
+
+
+### 3. Installation
+npm install
+
+
+
+### 4. Run App
+npm run tauri dev
 
 ### 1. **Executive Summary**
 This document details the engineering journey of developing "WisprClone," a native desktop application designed to replicate the functionality of the Wispr voice interface. The project leverages **Tauri v2** for its lightweight, secure system architecture, **React** for a responsive frontend, and the **Deepgram API** for low-latency speech-to-text transcription.  
@@ -95,7 +120,7 @@ The development of **WisprClone** demonstrates the complexity of modern hybrid d
 
 
 
-### **New Feature Implementation**
+### **5.New Feature Implementation**
 
 #### **The Initial Implementation: Live Key-Event Emulation**
 
